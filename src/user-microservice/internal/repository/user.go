@@ -17,13 +17,17 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, error) {
+	const sql = "SELECT * FROM public.user WHERE id = $1"
+
 	var user model.User
-	err := r.db.QueryRow(ctx, "SELECT id, email, password FROM public.user WHERE id = $1", id).Scan(&user.ID, &user.Email, &user.Password)
+	err := r.db.QueryRow(ctx, sql, id).Scan(&user.ID, &user.Email, &user.Password)
 	return &user, err
 }
 
 func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
-	rows, err := r.db.Query(ctx, "SELECT id, email, password FROM public.user")
+	const sql = "SELECT * FROM public.user"
+
+	rows, err := r.db.Query(ctx, sql)
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +51,15 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *UserRepository) AddUser(user *model.User) error {
-	_, err := r.db.Exec(context.Background(), "INSERT INTO public.user(email, password) VALUES ($1, $2)", user.Email, user.Password)
+	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2)"
+	_, err := r.db.Exec(context.Background(), sql, user.Email, user.Password)
 	return err
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	const sql = "SELECT * FROM public.user WHERE email = $1"
+
 	var user model.User
-	err := r.db.QueryRow(ctx, "SELECT id, email, password FROM public.user WHERE email = $1", email).Scan(&user.ID, &user.Email, &user.Password)
+	err := r.db.QueryRow(ctx, sql, email).Scan(&user.ID, &user.Email, &user.Password)
 	return &user, err
 }

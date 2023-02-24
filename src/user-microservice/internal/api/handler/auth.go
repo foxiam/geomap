@@ -25,38 +25,33 @@ func valid(email string) bool {
 
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	type LoginInput struct {
-		Identity string `json:"identity"`
-		Password string `json:"password"`
-	}
-	type UserData struct {
-		ID       uint   `json:"id"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
 	input := new(LoginInput)
-	var ud UserData
+	var ud model.User
 
 	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Error on login request", "data": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Error on login request", "data": err.Error()})
 	}
 
-	identity := input.Identity
+	identity := input.Email
 	pass := input.Password
 	user, err := new(model.User), *new(error)
 
 	if valid(identity) {
 		user, err = h.userRepository.FindByEmail(context.Background(), identity)
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "Error on email", "data": err})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "Error on email", "data": err.Error()})
 		}
 	}
 
 	if user == nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "User not found", "data": err})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "User not found", "data": err.Error()})
 	}
 
-	ud = UserData{
+	ud = model.User{
 		ID:       user.ID,
 		Email:    user.Email,
 		Password: user.Password,

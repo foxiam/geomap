@@ -28,6 +28,8 @@ func Run() error {
 		log.Fatal(err)
 	}
 
+	defer database.GetPool().Close()
+
 	app := fiber.New()
 
 	userService := router.NewUserService(app)
