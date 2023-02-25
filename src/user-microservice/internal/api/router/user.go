@@ -2,6 +2,7 @@ package router
 
 import (
 	"user-microservice/internal/api/handler"
+	"user-microservice/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -28,6 +29,5 @@ func (s *userServer) Router() {
 	user := api.Group("/user")
 	user.Get("/all", s.handler.GetAllUsers)
 	user.Get("/:id", s.handler.GetUser)
-	//user.Patch("/:id", middleware.Protected(), handler.UpdateUser)
-	//user.Delete("/:id", middleware.Protected(), s.handler.DeleteUser)
+	user.Delete("/:id", middleware.Protected(), s.handler.DeleteUser)
 }

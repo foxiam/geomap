@@ -5,11 +5,13 @@ go 1.20
 require (
 	github.com/go-delve/delve v1.20.1
 	github.com/gofiber/fiber/v2 v2.42.0
-	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/jackc/pgx/v5 v5.3.0
 	github.com/spf13/viper v1.15.0
 	golang.org/x/crypto v0.6.0
 )
+
+require github.com/gofiber/jwt/v3 v3.3.6 // indirect
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
@@ -32,7 +34,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
-	github.com/rivo/uniseg v0.4.3 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
 	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect

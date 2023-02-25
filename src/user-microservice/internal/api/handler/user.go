@@ -78,5 +78,9 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Not valid user", "data": nil})
 	}
 
+	if err := h.userRepository.DeleteUser(id); err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Failed to delete user", "data": nil})
+	}
+
 	return c.JSON(fiber.Map{"status": "success", "message": "User successfully deleted", "data": nil})
 }

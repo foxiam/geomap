@@ -50,16 +50,22 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) AddUser(user *model.User) error {
-	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2)"
-	_, err := r.db.Exec(context.Background(), sql, user.Email, user.Password)
-	return err
-}
-
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	const sql = "SELECT * FROM public.user WHERE email = $1"
 
 	var user model.User
 	err := r.db.QueryRow(ctx, sql, email).Scan(&user.ID, &user.Email, &user.Password)
 	return &user, err
+}
+
+func (r *UserRepository) AddUser(user *model.User) error {
+	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2)"
+	_, err := r.db.Exec(context.Background(), sql, user.Email, user.Password)
+	return err
+}
+
+func (r *UserRepository) DeleteUser(id string) error {
+	const sql = "DELETE FROM public.user WHERE id = $1"
+	_, err := r.db.Exec(context.Background(), sql, id)
+	return err
 }
