@@ -20,7 +20,7 @@ type envConfig struct {
 	DBName          string `mapstructure:"DB_NAME"`
 	DBSSLMode       string `mapstructure:"DB_SSL_MODE"`
 	DBPassword      string `mapstructure:"DB_PASSWORD"`
-	SecretJWT       string `mapstructure:"SECRET_JWT"`
+	SigningKeyJwt   string `mapstructure:"SIGNING_KEY_JWT"`
 }
 
 func loadEnvVariables() (config *envConfig) {

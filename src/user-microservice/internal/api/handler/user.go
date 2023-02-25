@@ -4,26 +4,18 @@ import (
 	"context"
 	"strconv"
 
-	"user-microservice/internal/model"
 	"user-microservice/internal/repository"
-	"user-microservice/pkg/database"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler struct {
 	userRepository *repository.UserRepository
 }
 
-func NewUserHandler() *UserHandler {
-	return &UserHandler{userRepository: repository.NewUserRepository(database.GetPool())}
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+func NewUserHandler(userRepo *repository.UserRepository) *UserHandler {
+	return &UserHandler{userRepository: userRepo}
 }
 
 func validToken(t *jwt.Token, id string) bool {
@@ -64,34 +56,6 @@ func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"status": "error", "message": err, "data": nil})
 	}
 	return c.JSON(fiber.Map{"status": "success", "message": "Users found", "data": users})
-}
-
-func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
-	type NewUser struct {
-		Email string `json:"email"`
-	}
-	user := new(model.User)
-	if err := c.BodyParser(user); err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
-
-	}
-
-	hash, err := hashPassword(user.Password)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't hash password", "data": err})
-
-	}
-
-	user.Password = hash
-	if err := h.userRepository.AddUser(user); err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Couldn't create user", "data": err})
-	}
-
-	newUser := NewUser{
-		Email: user.Email,
-	}
-
-	return c.JSON(fiber.Map{"status": "success", "message": "Created user", "data": newUser})
 }
 
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {

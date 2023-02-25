@@ -2,11 +2,12 @@ package internal
 
 import (
 	"context"
-	"fmt"
 	"log"
 
+	"user-microservice/internal/api/handler"
 	"user-microservice/internal/api/router"
 	"user-microservice/internal/config"
+	"user-microservice/internal/repository"
 	"user-microservice/pkg/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,25 +16,29 @@ import (
 func Run() error {
 	config.InitEnvConfigs()
 
-	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s",
-		config.EnvConfig.DBUsername,
-		config.EnvConfig.DBPassword,
-		config.EnvConfig.DBHost,
-		config.EnvConfig.DBPort,
-		config.EnvConfig.DBName,
+	pool, err := database.NewPostgresDB(
+		context.Background(),
+		database.Config{
+			Host:     config.EnvConfig.DBHost,
+			Port:     config.EnvConfig.DBPort,
+			Username: config.EnvConfig.DBUsername,
+			Name:     config.EnvConfig.DBName,
+			Password: config.EnvConfig.DBPassword,
+		},
 	)
-	err := database.InitDB(context.Background(), dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer database.GetPool().Close()
+	defer pool.Close()
 
 	app := fiber.New()
 
-	userService := router.NewUserService(app)
-	userService.Router()
+	userRepo := repository.NewUserRepository(pool)
+	userHandler := handler.NewUserHandler(userRepo)
+	userServer := router.NewUserServer(app, userHandler)
+
+	userServer.Router()
 	app.Listen(":3000")
 
 	return nil
