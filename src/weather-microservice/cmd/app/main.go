@@ -1,7 +1,9 @@
 package main
 
-import "weather-microservice/internal/app"
+import (
+	"weather-microservice/internal"
+)
 
 func main() {
-	app.Run()
+	internal.Run()
 }
