@@ -8,16 +8,16 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-type userServer struct {
+type Server struct {
 	app     *fiber.App
-	handler *handler.UserHandler
+	handler *handler.Handler
 }
 
-func NewUserServer(app *fiber.App, handler *handler.UserHandler) *userServer {
-	return &userServer{app: app, handler: handler}
+func NewServer(app *fiber.App, handler *handler.Handler) *Server {
+	return &Server{app: app, handler: handler}
 }
 
-func (s *userServer) Router() {
+func (s *Server) Router() {
 
 	api := s.app.Group("/api", logger.New())
 	//Auth

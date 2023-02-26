@@ -12,11 +12,11 @@ type UserRepository struct {
 	db *pgxpool.Pool
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepository {
+func NewUserPostgres(db *pgxpool.Pool) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) FindByID(ctx context.Context, id string) (*model.User, error) {
+func (r *UserRepository) FindUserById(ctx context.Context, id string) (*model.User, error) {
 	const sql = "SELECT * FROM public.user WHERE id = $1"
 
 	var user model.User
@@ -58,13 +58,13 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.
 	return &user, err
 }
 
-func (r *UserRepository) AddUser(user *model.User) error {
-	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2)"
-	_, err := r.db.Exec(context.Background(), sql, user.Email, user.Password)
-	return err
+func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) (id uint, err error) {
+	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2) RETURNING id"
+	err = r.db.QueryRow(context.Background(), sql, user.Email, user.Password).Scan(&id)
+	return id, err
 }
 
-func (r *UserRepository) DeleteUser(id string) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, id string) error {
 	const sql = "DELETE FROM public.user WHERE id = $1"
 	_, err := r.db.Exec(context.Background(), sql, id)
 	return err

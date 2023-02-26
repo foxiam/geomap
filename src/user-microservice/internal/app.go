@@ -8,6 +8,7 @@ import (
 	"user-microservice/internal/api/router"
 	"user-microservice/internal/config"
 	"user-microservice/internal/repository"
+	"user-microservice/internal/service"
 	"user-microservice/pkg/database"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,11 +35,12 @@ func Run() error {
 
 	app := fiber.New()
 
-	userRepo := repository.NewUserRepository(pool)
-	userHandler := handler.NewUserHandler(userRepo)
-	userServer := router.NewUserServer(app, userHandler)
+	repos := repository.NewRepository(pool)
+	services := service.NewService(repos)
+	handlers := handler.NewHandler(services)
+	server := router.NewServer(app, handlers)
 
-	userServer.Router()
+	server.Router()
 	app.Listen(":3000")
 
 	return nil
