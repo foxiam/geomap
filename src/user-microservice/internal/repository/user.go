@@ -2,32 +2,32 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"user-microservice/internal/model"
-
-	"github.com/jackc/pgx/v5/pgxpool"
+	"user-microservice/pkg/database"
 )
 
 type UserRepository struct {
-	db *pgxpool.Pool
+	db database.PGXQuerier
 }
 
-func NewUserPostgres(db *pgxpool.Pool) *UserRepository {
+func NewUserPostgres(db database.PGXQuerier) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) FindUserById(ctx context.Context, id string) (*model.User, error) {
-	const sql = "SELECT * FROM public.user WHERE id = $1"
+func (r *UserRepository) FindById(ctx context.Context, id string) (*model.User, error) {
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", userTable)
 
 	var user model.User
-	err := r.db.QueryRow(ctx, sql, id).Scan(&user.ID, &user.Email, &user.Password)
+	err := r.db.QueryRow(ctx, query, id).Scan(&user.Id, &user.Email, &user.Password)
 	return &user, err
 }
 
 func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
-	const sql = "SELECT * FROM public.user"
+	query := fmt.Sprintf("SELECT * FROM %s", userTable)
 
-	rows, err := r.db.Query(ctx, sql)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
 	var users []*model.User
 	for rows.Next() {
 		var user model.User
-		err = rows.Scan(&user.ID, &user.Email, &user.Password)
+		err = rows.Scan(&user.Id, &user.Email, &user.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -51,21 +51,21 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*model.User, error) {
-	const sql = "SELECT * FROM public.user WHERE email = $1"
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email = $1", userTable)
 
 	var user model.User
-	err := r.db.QueryRow(ctx, sql, email).Scan(&user.ID, &user.Email, &user.Password)
+	err := r.db.QueryRow(ctx, query, email).Scan(&user.Id, &user.Email, &user.Password)
 	return &user, err
 }
 
 func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) (id uint, err error) {
-	const sql = "INSERT INTO public.user(email, password) VALUES ($1, $2) RETURNING id"
-	err = r.db.QueryRow(context.Background(), sql, user.Email, user.Password).Scan(&id)
+	query := fmt.Sprintf("INSERT INTO %s (email, password) VALUES ($1, $2) RETURNING id", userTable)
+	err = r.db.QueryRow(ctx, query, user.Email, user.Password).Scan(&id)
 	return id, err
 }
 
 func (r *UserRepository) DeleteUser(ctx context.Context, id string) error {
-	const sql = "DELETE FROM public.user WHERE id = $1"
-	_, err := r.db.Exec(context.Background(), sql, id)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", userTable)
+	_, err := r.db.Exec(ctx, query, id)
 	return err
 }

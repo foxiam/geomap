@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"net/mail"
 	"strconv"
 	"time"
 	"user-microservice/internal/config"
@@ -27,6 +28,9 @@ func NewUserService(r repository.User) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, user *model.User) (uint, error) {
+	if !validEmail(user.Email) {
+		return 0, errors.New("invalid email format")
+	}
 	hash, err := generatePasswordHash(user.Password)
 	if err != nil {
 		return 0, err
@@ -40,7 +44,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id, pass string, t *jwt.To
 		return errors.New("invalid token id")
 	}
 
-	if !s.validUser(id, pass) {
+	if !s.validUser(ctx, id, pass) {
 		return errors.New("not valid user")
 	}
 
@@ -65,14 +69,14 @@ func (s *UserService) GenerateToken(ctx context.Context, u *model.User) (string,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
-		user.ID,
+		user.Id,
 	})
 
 	return token.SignedString([]byte(config.EnvConfig.SigningKeyJwt))
 }
 
 func (s *UserService) GetUser(ctx context.Context, id string) (*model.User, error) {
-	user, err := s.repo.FindUserById(ctx, id)
+	user, err := s.repo.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +84,7 @@ func (s *UserService) GetUser(ctx context.Context, id string) (*model.User, erro
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]*model.User, error) {
-	users, err := s.repo.FindAll(context.Background())
+	users, err := s.repo.FindAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +114,8 @@ func validToken(t *jwt.Token, id string) bool {
 	return uid == n
 }
 
-func (s *UserService) validUser(id string, p string) bool {
-	user, err := s.repo.FindUserById(context.Background(), id)
+func (s *UserService) validUser(ctx context.Context, id string, p string) bool {
+	user, err := s.repo.FindById(ctx, id)
 	if err != nil {
 		return false
 	}
@@ -119,4 +123,9 @@ func (s *UserService) validUser(id string, p string) bool {
 		return false
 	}
 	return true
+}
+
+func validEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }

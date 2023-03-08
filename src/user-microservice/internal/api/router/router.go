@@ -20,13 +20,21 @@ func NewServer(app *fiber.App, handler *handler.Handler) *Server {
 func (s *Server) Router() {
 
 	api := s.app.Group("/api", logger.New())
-	//Auth
+
 	auth := api.Group("/auth")
+	user := api.Group("/user")
+	favorite := user.Group("/favorite-cities")
+
+	//Auth
 	auth.Post("/login", s.handler.SignIn)
 	auth.Post("/registration", s.handler.SingUp)
 
-	// User
-	user := api.Group("/user")
+	//Favorite
+	favorite.Get("/:id", s.handler.GetAllByUserId)
+	favorite.Post("", s.handler.AddToFavorite)
+	favorite.Delete("", s.handler.DeleteFromFavorite)
+
+	//User
 	user.Get("/all", s.handler.GetAllUsers)
 	user.Get("/:id", s.handler.GetUser)
 	user.Delete("/:id", middleware.Protected(), s.handler.DeleteUser)

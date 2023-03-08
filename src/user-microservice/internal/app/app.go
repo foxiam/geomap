@@ -1,4 +1,4 @@
-package internal
+package app
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func Run() error {
 	server := router.NewServer(app, handlers)
 
 	server.Router()
-	app.Listen(":3000")
+	app.Listen(":" + config.EnvConfig.LocalServerPort)
 
 	return nil
 }

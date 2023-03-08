@@ -1,7 +1,9 @@
 package main
 
-import "user-microservice/internal"
+import (
+	"user-microservice/internal/app"
+)
 
 func main() {
-	internal.Run()
+	app.Run()
 }

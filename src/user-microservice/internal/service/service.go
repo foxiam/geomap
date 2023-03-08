@@ -16,12 +16,20 @@ type User interface {
 	GetAllUsers(ctx context.Context) ([]*model.User, error)
 }
 
+type City interface {
+	GetAllByUserId(ctx context.Context, userId string) ([]*model.City, error)
+	AddToFavorite(ctx context.Context, userId, cityName string) error
+	DeleteFromFavorite(ctx context.Context, userId, cityName string) error
+}
+
 type Service struct {
 	User
+	City
 }
 
 func NewService(r *repository.Repository) *Service {
 	return &Service{
 		User: NewUserService(r.User),
+		City: NewCityService(r.City),
 	}
 }
