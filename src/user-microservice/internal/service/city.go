@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"user-microservice/internal/model"
 	"user-microservice/internal/repository"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type CityService struct {
@@ -24,7 +27,11 @@ func (s *CityService) GetAllByUserId(ctx context.Context, userId string) ([]*mod
 	return cities, nil
 }
 
-func (s *CityService) AddToFavorite(ctx context.Context, userId, cityName string) error {
+func (s *CityService) AddToFavorite(ctx context.Context, userId, cityName string, t *jwt.Token) error {
+	if !validToken(t, userId) {
+		return errors.New("invalid token id")
+	}
+
 	city, err := s.repo.FindByName(ctx, cityName)
 	if err != nil {
 		return err
@@ -34,7 +41,11 @@ func (s *CityService) AddToFavorite(ctx context.Context, userId, cityName string
 	return s.repo.AddToFavorite(ctx, userId, cityId)
 }
 
-func (s *CityService) DeleteFromFavorite(ctx context.Context, userId, cityName string) error {
+func (s *CityService) DeleteFromFavorite(ctx context.Context, userId, cityName string, t *jwt.Token) error {
+	if !validToken(t, userId) {
+		return errors.New("invalid token id")
+	}
+
 	city, err := s.repo.FindByName(ctx, cityName)
 	if err != nil {
 		return err

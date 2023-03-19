@@ -31,8 +31,8 @@ func (s *Server) Router() {
 
 	//Favorite
 	favorite.Get("/:id", s.handler.GetAllByUserId)
-	favorite.Post("", s.handler.AddToFavorite)
-	favorite.Delete("", s.handler.DeleteFromFavorite)
+	favorite.Post("", middleware.Protected(), s.handler.AddToFavorite)
+	favorite.Delete("", middleware.Protected(), s.handler.DeleteFromFavorite)
 
 	//User
 	user.Get("/all", s.handler.GetAllUsers)

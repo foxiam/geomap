@@ -18,8 +18,8 @@ type User interface {
 
 type City interface {
 	GetAllByUserId(ctx context.Context, userId string) ([]*model.City, error)
-	AddToFavorite(ctx context.Context, userId, cityName string) error
-	DeleteFromFavorite(ctx context.Context, userId, cityName string) error
+	AddToFavorite(ctx context.Context, userId, cityName string, t *jwt.Token) error
+	DeleteFromFavorite(ctx context.Context, userId, cityName string, t *jwt.Token) error
 }
 
 type Service struct {
