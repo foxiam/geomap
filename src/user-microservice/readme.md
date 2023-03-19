@@ -32,11 +32,11 @@ This endpoint requires a valid JWT token to be included in the request header.
 ### Get All Users
 To get all users, send a GET request to `/api/user/all`.
 
-### Favorite Cities Endpoints
-## Get Favorite Cities
+## Favorite Cities Endpoints
+### Get Favorite Cities
 To get a user's favorite cities, send a GET request to `/api/user/favorite-cities/:id`.
 
-## Add Favorite City
+### Add Favorite City
 To add a new favorite city for a user, send a POST request to `/api/user/favorite-cities` with the following request body:
 ```json
 {
@@ -45,7 +45,7 @@ To add a new favorite city for a user, send a POST request to `/api/user/favorit
 }
 ```
 This endpoint requires a valid JWT token to be included in the request header.
-## Delete Favorite City
+### Delete Favorite City
 To delete a favorite city for a user, send a DELETE request to `/api/user/favorite-cities` with the following request body:
 ```json
 {
