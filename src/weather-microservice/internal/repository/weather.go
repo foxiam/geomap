@@ -16,6 +16,37 @@ func NewWeatherRepository(db *pgxpool.Pool) *WeatherRepository {
 	return &WeatherRepository{db: db}
 }
 
+func (r *WeatherRepository) GetPositions(ctx context.Context) ([]*model.City, error) {
+	const query = "SELECT id, city, lat, lng FROM public.positions LIMIT 10"
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cities []*model.City
+	for rows.Next() {
+		var city model.City
+		err = rows.Scan(
+			&city.Id,
+			&city.City,
+			&city.Coordinates.Lat,
+			&city.Coordinates.Lng)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		cities = append(cities, &city)
+	}
+
+	if err = rows.Err(); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return cities, nil
+}
+
 func (r *WeatherRepository) GetAll(ctx context.Context) ([]*model.Weather, error) {
 	const query = "SELECT * FROM public.weather"
 	rows, err := r.db.Query(ctx, query)

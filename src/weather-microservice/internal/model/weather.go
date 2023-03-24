@@ -9,6 +9,16 @@ type Weather struct {
 	AirPollution      int    `json:"air_pollution"`
 	Humidity          int    `json:"humidity"`
 }
+type coordinates struct {
+	Lat float32 `json:"lat"`
+	Lng float32 `json:"lng"`
+}
+
+type City struct {
+	Id          int         `json:"id"`
+	City        string      `json:"city"`
+	Coordinates coordinates `json:"coordinates"`
+}
 
 type WeatherFilter struct {
 	SpringTempMore   int `json:"spring_temp_more"`
