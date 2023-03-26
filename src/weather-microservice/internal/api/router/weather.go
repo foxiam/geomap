@@ -20,7 +20,6 @@ func (s *WeatherService) Router() {
 
 	api := s.app.Group("/api", logger.New())
 
-	api.Get("/positions", s.handler.GetAllPositions)
 	api.Get("/all", s.handler.GetAllCities)
 	api.Get("/:name", s.handler.GetByName)
 	api.Post("/filter", s.handler.GetByFilter)

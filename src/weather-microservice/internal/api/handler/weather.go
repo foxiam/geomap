@@ -18,14 +18,6 @@ func NewWeatherHandler() *WeatherHandler {
 	return &WeatherHandler{WeatherRepository: repository.NewWeatherRepository(database.GetPool())}
 }
 
-func (h *WeatherHandler) GetAllPositions(c *fiber.Ctx) error {
-	cities, err := h.WeatherRepository.GetPositions(context.Background())
-	if err != nil {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": err.Error(), "data": nil})
-	}
-	return c.JSON(fiber.Map{"data": cities})
-}
-
 func (h *WeatherHandler) GetAllCities(c *fiber.Ctx) error {
 	cities, err := h.WeatherRepository.GetAll(context.Background())
 	if err != nil {

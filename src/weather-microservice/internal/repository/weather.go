@@ -16,37 +16,6 @@ func NewWeatherRepository(db *pgxpool.Pool) *WeatherRepository {
 	return &WeatherRepository{db: db}
 }
 
-func (r *WeatherRepository) GetPositions(ctx context.Context) ([]*model.City, error) {
-	const query = "SELECT id, city, lat, lng FROM public.positions LIMIT 10"
-	rows, err := r.db.Query(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var cities []*model.City
-	for rows.Next() {
-		var city model.City
-		err = rows.Scan(
-			&city.Id,
-			&city.City,
-			&city.Coordinates.Lat,
-			&city.Coordinates.Lng)
-		if err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		cities = append(cities, &city)
-	}
-
-	if err = rows.Err(); err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	return cities, nil
-}
-
 func (r *WeatherRepository) GetAll(ctx context.Context) ([]*model.Weather, error) {
 	const query = "SELECT * FROM public.weather"
 	rows, err := r.db.Query(ctx, query)
@@ -64,7 +33,6 @@ func (r *WeatherRepository) GetAll(ctx context.Context) ([]*model.Weather, error
 			&city.AverageSummerTemp,
 			&city.AverageAutumnTemp,
 			&city.AverageWinterTemp,
-			&city.AirPollution,
 			&city.Humidity)
 		if err != nil {
 			fmt.Println(err)
@@ -91,19 +59,19 @@ func (r *WeatherRepository) GetByName(ctx context.Context, name string) (*model.
 		&city.AverageSummerTemp,
 		&city.AverageAutumnTemp,
 		&city.AverageWinterTemp,
-		&city.AirPollution,
 		&city.Humidity)
 	return &city, err
 }
 
 func (r *WeatherRepository) FindAllByFilter(ctx context.Context, filter *model.WeatherFilter) ([]*model.Weather, error) {
-	const query = "SELECT * FROM public.weather WHERE " +
+	const query = "SELECT id, name, lat, lng, average_spring_temp, average_summer_temp, average_autumn_temp, average_winter_temp, humidity, score, green, type_city, climate, population FROM public.weather WHERE " +
 		"average_spring_temp BETWEEN $1 AND $2 AND " +
 		"average_summer_temp BETWEEN $3 AND $4 AND " +
 		"average_autumn_temp BETWEEN $5 AND $6 AND " +
 		"average_winter_temp BETWEEN $7 AND $8 AND " +
-		"air_pollution BETWEEN $9 AND $10 AND " +
-		"humidity BETWEEN $11 AND $12"
+		"humidity BETWEEN $9 AND $10 AND " +
+		"score BETWEEN $11 AND $12 AND " +
+		"green BETWEEN $13 AND $14"
 
 	rows, err := r.db.Query(ctx, query,
 		filter.SpringTempMore,
@@ -114,10 +82,12 @@ func (r *WeatherRepository) FindAllByFilter(ctx context.Context, filter *model.W
 		filter.AutumnTempLess,
 		filter.WinterTempMore,
 		filter.WinterTempLess,
-		filter.AirPollutionMore,
-		filter.AirPollutionLess,
 		filter.HumidityMore,
-		filter.HumidityLess)
+		filter.HumidityLess,
+		filter.ScoreMore,
+		filter.ScoreLess,
+		filter.GreenMore,
+		filter.GreenLess)
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +97,20 @@ func (r *WeatherRepository) FindAllByFilter(ctx context.Context, filter *model.W
 	for rows.Next() {
 		var city model.Weather
 		err = rows.Scan(
+			&city.Id,
 			&city.City,
+			&city.Coordinates.Lat,
+			&city.Coordinates.Lng,
 			&city.AverageSpringTemp,
 			&city.AverageSummerTemp,
 			&city.AverageAutumnTemp,
 			&city.AverageWinterTemp,
-			&city.AirPollution,
-			&city.Humidity)
+			&city.Humidity,
+			&city.Score,
+			&city.Green,
+			&city.TypeCity,
+			&city.Climate,
+			&city.Population)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
